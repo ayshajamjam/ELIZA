@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ELIZA</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <h1>ELIZA</h1>
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <form id="chat-form" action="/chat" method="post">
+            <input type="text" name="user_input" id="user-input" autocomplete="off">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const chatLog = document.getElementById('chat-log');
+        const userInput = document.getElementById('user-input');
+
+        chatForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const userMessage = userInput.value;
+            if (userMessage.trim() !== '') {
+                appendMessage('You: ' + userMessage, 'user');
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'user_input=' + encodeURIComponent(userMessage)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        appendMessage('ELIZA: ' + data.response, 'bot');
+                    });
+
+                userInput.value = '';
+            }
+        });
+
+        function appendMessage(message, type) {
+            const messageElement = document.createElement('div');
+            if (type == 'user'){
+                messageElement.className = 'user-message'
+            }
+            else {
+                messageElement.className = 'bot-message'
+            }
+            messageElement.textContent = message;
+            chatLog.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>
